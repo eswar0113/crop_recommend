@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment & Secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
+
+# Python & Virtual Environment
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+ENV/
+.pytest_cache/
+
+# ML Models (Ignore temporary pickles, but include pre-trained model for deployment)
+*.pkl
+!ml-service/model/crop_model.pkl
+
+# Build outputs
+dist/
+build/
+.vite/
+*.log
+
+# IDE / OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+

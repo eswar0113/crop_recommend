@@ -1,0 +1,746 @@
+Build a complete **AI-Based Crop Recommendation System** as a full-stack web application using the **PERN stack** with a separate Python Machine Learning service.
+
+## 1. Project Objective
+
+Build a **Crop Recommendation System using Machine Learning**.
+
+For my first project review, I want to demonstrate a **software-based simulation**. The user will manually enter agricultural and environmental parameters through a web dashboard. The system will send these values to the backend, where a trained **Random Forest Machine Learning model** will predict the most suitable crop.
+
+Every prediction, along with the input parameters and timestamp, must be stored in **PostgreSQL** so that the user can view their previous prediction history.
+
+The system should also be designed for future **hardware integration using ESP32 and sensors**. Hardware integration is NOT required now, but the API architecture should make it easy to add later.
+
+---
+
+# 2. Technology Stack
+
+## Frontend — React
+
+Use:
+
+* React.js
+* JavaScript
+* HTML5
+* CSS3
+* Axios
+* React components and hooks
+
+The frontend should provide the user interface for entering parameters, displaying predictions, and viewing prediction history.
+
+---
+
+## Backend — PERN Stack
+
+Use:
+
+* **Node.js**
+* **Express.js**
+* REST APIs
+* PostgreSQL
+* `pg` / node-postgres for PostgreSQL connection
+
+The Node.js + Express backend should act as the main application server.
+
+Responsibilities:
+
+* Receive requests from React
+* Validate input
+* Communicate with the Python ML service
+* Receive the predicted crop
+* Store prediction results in PostgreSQL
+* Retrieve prediction history
+* Delete prediction history
+* Return responses to React
+
+---
+
+## Database — PostgreSQL
+
+Use PostgreSQL to store prediction history.
+
+Database name:
+
+`crop_recommendation`
+
+Create a table such as:
+
+`prediction_history`
+
+The table should contain:
+
+* `id`
+* `N`
+* `P`
+* `K`
+* `temperature`
+* `humidity`
+* `ph`
+* `rainfall`
+* `predicted_crop`
+* `created_at`
+
+Use an automatically generated ID and timestamp.
+
+Do NOT store the ML model inside PostgreSQL.
+
+---
+
+## Machine Learning Service — Python
+
+Use:
+
+* Python
+* Flask
+* Pandas
+* NumPy
+* Scikit-learn
+* Random Forest Classifier
+* Joblib
+
+The Python service will contain the trained Machine Learning model.
+
+The Node.js backend should communicate with the Python ML service through HTTP REST API requests.
+
+---
+
+# 3. Overall Architecture
+
+Use this architecture:
+
+```text
+                 React Frontend
+                       |
+                     Axios
+                       |
+                       v
+             Node.js + Express API
+                  /           \
+                 /             \
+                v               v
+       Python ML Service      PostgreSQL
+                |
+                v
+       Random Forest Model
+```
+
+Prediction flow:
+
+```text
+User
+  ↓
+React Dashboard
+  ↓
+Node.js / Express
+  ↓
+Python ML API
+  ↓
+Random Forest Model
+  ↓
+Predicted Crop
+  ↓
+Node.js / Express
+  ↓
+PostgreSQL
+  ↓
+React Dashboard
+```
+
+---
+
+# 4. Dataset Parameters
+
+Use ONLY these exact input features from the dataset.
+
+### Input Features
+
+1. `N` — Nitrogen content in soil (kg/ha)
+2. `P` — Phosphorus content in soil (kg/ha)
+3. `K` — Potassium content in soil (kg/ha)
+4. `temperature` — Temperature (°C)
+5. `humidity` — Humidity (%)
+6. `ph` — Soil pH
+7. `rainfall` — Rainfall (mm)
+
+### Target
+
+`label` — Recommended Crop
+
+Do NOT add:
+
+* Soil Type
+* Moisture Content
+* Any other feature
+
+unless they actually exist in the supplied dataset.
+
+The model must use exactly these seven input features:
+
+```text
+N
+P
+K
+temperature
+humidity
+ph
+rainfall
+```
+
+---
+
+# 5. React Web Dashboard
+
+Create a clean, modern and responsive dashboard suitable for a **college final-year project demonstration**.
+
+## Dashboard Sections
+
+### A. Header
+
+Display:
+
+**AI-Based Crop Recommendation System**
+
+Add a short description:
+
+"Predict the most suitable crop using soil and environmental parameters."
+
+---
+
+### B. Crop Prediction Form
+
+Create input fields for:
+
+* Nitrogen (N)
+* Phosphorus (P)
+* Potassium (K)
+* Temperature
+* Humidity
+* Soil pH
+* Rainfall
+
+Each field should have:
+
+* Proper label
+* Unit
+* Placeholder/example value
+* Numeric input
+* Basic validation
+
+Add:
+
+**Predict Crop**
+
+button.
+
+---
+
+# 6. Prediction Result
+
+After clicking **Predict Crop**:
+
+1. Validate the form.
+2. Send the values to the Node.js backend.
+3. Node.js sends the values to the Python ML service.
+4. Python ML service predicts the crop.
+5. Python returns the prediction.
+6. Node.js stores the prediction in PostgreSQL.
+7. Node.js returns the result to React.
+8. React displays the predicted crop.
+
+Example:
+
+```text
+Recommended Crop
+
+        RICE
+```
+
+Also display the input parameters used for the prediction.
+
+Do NOT hardcode any prediction.
+
+Every prediction must come from the trained Random Forest model.
+
+---
+
+# 7. Node.js + Express API
+
+Create these REST endpoints.
+
+## Predict Crop
+
+```text
+POST /api/predict
+```
+
+Request:
+
+```json
+{
+  "N": 90,
+  "P": 42,
+  "K": 43,
+  "temperature": 25.5,
+  "humidity": 80,
+  "ph": 6.5,
+  "rainfall": 200
+}
+```
+
+The Node.js backend should:
+
+1. Validate the input.
+2. Send the seven values to the Python ML API.
+3. Receive the predicted crop.
+4. Insert the input values and prediction into PostgreSQL.
+5. Return the result to React.
+
+Example response:
+
+```json
+{
+  "success": true,
+  "predicted_crop": "rice"
+}
+```
+
+---
+
+## Get Prediction History
+
+```text
+GET /api/history
+```
+
+Retrieve prediction records from PostgreSQL.
+
+Return:
+
+* ID
+* N
+* P
+* K
+* temperature
+* humidity
+* ph
+* rainfall
+* predicted crop
+* timestamp
+
+Sort the newest predictions first.
+
+---
+
+## Delete Prediction History
+
+```text
+DELETE /api/history
+```
+
+Delete all prediction history from PostgreSQL.
+
+The frontend should ask for confirmation before clearing the history.
+
+---
+
+# 8. Python Machine Learning Service
+
+Create a separate Python Flask application.
+
+For example:
+
+```text
+ml-service/
+├── app.py
+├── train_model.py
+├── model/
+│   └── crop_model.pkl
+├── dataset/
+│   └── crop_recommendation.csv
+└── requirements.txt
+```
+
+The Python service should expose:
+
+```text
+POST /predict
+```
+
+Example request:
+
+```json
+{
+  "N": 90,
+  "P": 42,
+  "K": 43,
+  "temperature": 25.5,
+  "humidity": 80,
+  "ph": 6.5,
+  "rainfall": 200
+}
+```
+
+Example response:
+
+```json
+{
+  "predicted_crop": "rice"
+}
+```
+
+---
+
+# 9. Machine Learning Training
+
+Create:
+
+```text
+train_model.py
+```
+
+The training script should:
+
+1. Load the dataset.
+2. Check for missing values.
+3. Check for duplicate rows.
+4. Check data types.
+5. Clean the dataset if necessary.
+6. Separate features and target.
+7. Use the seven input features.
+8. Split the data into training and testing sets.
+9. Train a Random Forest Classifier.
+10. Evaluate the model.
+11. Display accuracy.
+12. Display a classification report.
+13. Save the trained model using Joblib.
+
+The model should be saved as:
+
+```text
+crop_model.pkl
+```
+
+The Flask ML service should load this saved model when it starts.
+
+**Do not train the model every time a prediction is requested.**
+
+---
+
+# 10. PostgreSQL Database
+
+Use PostgreSQL for prediction history.
+
+Create:
+
+```text
+Database:
+crop_recommendation
+```
+
+Create:
+
+```text
+Table:
+prediction_history
+```
+
+Suggested schema:
+
+```sql
+CREATE TABLE prediction_history (
+    id SERIAL PRIMARY KEY,
+    N NUMERIC NOT NULL,
+    P NUMERIC NOT NULL,
+    K NUMERIC NOT NULL,
+    temperature NUMERIC NOT NULL,
+    humidity NUMERIC NOT NULL,
+    ph NUMERIC NOT NULL,
+    rainfall NUMERIC NOT NULL,
+    predicted_crop VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+Use parameterized SQL queries.
+
+Do not construct SQL queries using raw user input.
+
+---
+
+# 11. Environment Variables
+
+Do not hardcode database credentials.
+
+Create `.env` for the Node.js backend.
+
+Example:
+
+```text
+PORT=5000
+DATABASE_URL=your_postgresql_connection_string
+ML_SERVICE_URL=http://localhost:8000
+```
+
+Create:
+
+```text
+.env.example
+```
+
+with placeholder values.
+
+Add `.env` to `.gitignore`.
+
+The React frontend must NOT contain database credentials.
+
+---
+
+# 12. Prediction History UI
+
+Create a **Prediction History** section on the dashboard.
+
+Display previous predictions retrieved from:
+
+```text
+GET /api/history
+```
+
+Each record should show:
+
+* Date/time
+* N
+* P
+* K
+* Temperature
+* Humidity
+* pH
+* Rainfall
+* Predicted Crop
+
+Provide a:
+
+**Clear History**
+
+button.
+
+Do not use static or dummy history data.
+
+All history must come from PostgreSQL.
+
+---
+
+# 13. UI Design
+
+Make the dashboard:
+
+* Clean
+* Modern
+* Professional
+* Responsive
+* Easy to understand
+* Suitable for a project review
+
+Avoid excessive animations.
+
+Prioritize functionality and readability.
+
+Include:
+
+* Header
+* Project description
+* Prediction form
+* Predict Crop button
+* Loading state
+* Prediction result card
+* Input summary
+* Prediction history
+* Clear history button
+* Error messages
+* Empty-history message
+
+---
+
+# 14. Error Handling
+
+Implement proper error handling throughout the application.
+
+Handle:
+
+* Empty inputs
+* Invalid numbers
+* Out-of-range values
+* Backend errors
+* ML service unavailable
+* PostgreSQL connection errors
+* Prediction errors
+
+Display user-friendly messages on the React frontend.
+
+Do not expose sensitive backend or database information to the user.
+
+---
+
+# 15. Project Structure
+
+Use this overall structure:
+
+```text
+crop-recommendation/
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── services/
+│   │   └── App.jsx
+│   ├── package.json
+│   └── ...
+│
+├── backend/
+│   ├── server.js
+│   ├── routes/
+│   │   ├── predictionRoutes.js
+│   │   └── historyRoutes.js
+│   ├── controllers/
+│   ├── services/
+│   ├── db/
+│   ├── .env
+│   ├── .env.example
+│   ├── package.json
+│   └── ...
+│
+├── ml-service/
+│   ├── app.py
+│   ├── train_model.py
+│   ├── model/
+│   │   └── crop_model.pkl
+│   ├── dataset/
+│   │   └── crop_recommendation.csv
+│   └── requirements.txt
+│
+├── README.md
+└── .gitignore
+```
+
+Keep frontend, backend, database logic, and ML service clearly separated.
+
+---
+
+# 16. Future Hardware Integration
+
+Do NOT implement hardware integration in the current version.
+
+However, design the APIs so that an ESP32 can later send sensor readings to the backend.
+
+Future hardware:
+
+* NPK sensor
+* Temperature/humidity sensor
+* Soil pH sensor
+* Rainfall sensor
+* ESP32
+
+Future architecture:
+
+```text
+NPK Sensor
+Temperature/Humidity Sensor
+Soil pH Sensor
+Rainfall Sensor
+        ↓
+      ESP32
+        ↓
+Node.js / Express API
+        ↓
+Python ML Service
+        ↓
+Random Forest Model
+        ↓
+Predicted Crop
+        ↓
+PostgreSQL
+        ↓
+React Dashboard
+```
+
+The current system should simulate the sensor values using manual user input.
+
+---
+
+# 17. Current First-Review Architecture
+
+For the first review, implement only:
+
+```text
+User
+ ↓
+React Dashboard
+ ↓
+Node.js + Express
+ ↓
+Python ML Service
+ ↓
+Random Forest Model
+ ↓
+Predicted Crop
+ ↓
+Node.js + Express
+ ↓
+PostgreSQL
+ ↓
+Prediction History
+ ↓
+React Dashboard
+```
+
+This must be fully functional using manually entered values.
+
+---
+
+# 18. README
+
+Create a detailed but beginner-friendly `README.md`.
+
+Include:
+
+1. Project overview
+2. Features
+3. Technology stack
+4. System architecture
+5. Dataset parameters
+6. Machine Learning workflow
+7. PostgreSQL database setup
+8. Backend setup
+9. Python ML service setup
+10. Frontend setup
+11. Environment variables
+12. How to train the model
+13. How to start all three services
+14. API endpoints
+15. Example API requests
+16. Future hardware integration
+
+Clearly explain that:
+
+**PERN handles the web application and prediction history, while the Python service handles Machine Learning.**
+
+---
+
+# 19. Important Requirements
+
+* Use **PERN** for the main web application.
+* Use **PostgreSQL**, not MongoDB.
+* Use **React** for frontend.
+* Use **Node.js + Express** for the main backend.
+* Use **Python + Flask** as the separate ML service.
+* Use **Random Forest Classifier** for crop prediction.
+* Use exactly seven ML input features: N, P, K, temperature, humidity, ph, rainfall.
+* Store every prediction in PostgreSQL.
+* Provide prediction history.
+* Do not use dummy prediction data.
+* Do not hardcode predictions.
+* Do not retrain the model during prediction.
+* Keep the ML service separate from the Node.js backend.
+* Use environment variables for sensitive configuration.
+* Make the complete application functional.
+* Keep the code simple, modular, and suitable for a student project.
+* Prepare the API architecture for future ESP32/hardware integration.
