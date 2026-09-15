@@ -105,8 +105,9 @@ exports.predictCrop = async (req, res) => {
 
     // 2. Call Python ML Service
     let mlResponse;
+    const cleanedMlUrl = ML_SERVICE_URL.replace(/\/+$/, '');
     try {
-      mlResponse = await axios.post(`${ML_SERVICE_URL}/predict`, {
+      mlResponse = await axios.post(`${cleanedMlUrl}/predict`, {
         N: nNum,
         P: pNum,
         K: kNum,
@@ -114,12 +115,12 @@ exports.predictCrop = async (req, res) => {
         humidity: humNum,
         ph: phNum,
         rainfall: rainNum
-      }, { timeout: 5000 });
+      }, { timeout: 30000 });
     } catch (mlErr) {
       console.error('[ML Service Connection Error]', mlErr.message);
       return res.status(503).json({
         success: false,
-        error: 'Machine Learning service is currently unavailable. Please make sure the Python ML service is running on port 8000.'
+        error: `Machine Learning service unavailable (${mlErr.message}). Check ML_SERVICE_URL environment variable.`
       });
     }
 
